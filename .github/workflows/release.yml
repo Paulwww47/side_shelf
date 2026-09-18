@@ -1,0 +1,56 @@
+name: release
+
+on:
+  push:
+    tags: ['v[0-9]*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 要发布的标签（例如 v1.0.0）
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  windows-x64:
+    name: 构建并发布 Windows x64 发布包
+    runs-on: windows-2022
+    env:
+      QT_VERSION: '6.9.3'
+    steps:
+      - name: 检出
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: 安装 Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: win64_msvc2022_64
+          cache: true
+
+      - name: 配置
+        run: cmake -S cpp -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: 构建
+        run: cmake --build build
+
+      - name: 打包（windeployqt + zip + SHA256）
+        shell: pwsh
+        run: |
+          ./scripts/package-release.ps1 `
+            -Exe build/side_shelf.exe `
+            -Version "${{ inputs.tag || github.ref_name }}" `
+            -OutDir dist
+
+      - name: 上传资产
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: |
+            dist/*.zip
+            dist/SHA256SUMS.txt
+          generate_release_notes: true

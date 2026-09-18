@@ -114,8 +114,10 @@ static int run(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("SideShelf"));
-    // 全界面字体：Maple Mono NF CN。右键菜单 / 气泡提示 / 消息框等控件都
-    // 跟随应用级默认字体，因此在事件循环开始前统一设定。
+    // 全界面字体统一由 UiFont 收口：微软雅黑字族链 + Light(300) 字重
+    // （「微软雅黑 Light」并非独立字族，细节见 uifont.h）。
+    // 右键菜单 / 气泡提示 / 消息框等控件都跟随应用级默认字体，
+    // 因此在事件循环开始前统一设定。
     UiFont::applyToApplication();
     if (g_devLog) {
         // 开发模式留证：记录实际解析到的字族与字面（字族名写错会静默落到别处，

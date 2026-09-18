@@ -1,0 +1,46 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  windows-x64:
+    name: Windows x64 · MSVC · Qt 6
+    runs-on: windows-2022
+    env:
+      QT_VERSION: '6.9.3'
+    steps:
+      - name: 检出
+        uses: actions/checkout@v4
+
+      - name: 安装 Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: win64_msvc2022_64
+          cache: true
+
+      - name: 配置
+        run: cmake -S cpp -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: 构建
+        run: cmake --build build
+
+      # 注意：本项目的自检（--selftest）会校验透明窗口属性、屏幕边缘几何与
+      # 剪贴板往返，需要真实的交互式桌面会话，在无头 runner 上并不可靠，
+      # 因此不纳入 CI。请在本地 Windows 桌面上执行：
+      #     side_shelf.exe --selftest

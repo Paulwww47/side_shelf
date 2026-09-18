@@ -2,8 +2,11 @@
 cpp/build/
 cpp/build-*/
 cpp/stale_root_copies/
+build/
+dist/
 CMakeCache.txt
 CMakeFiles/
+CMakeUserPresets.json
 *.ninja
 .ninja_deps
 .ninja_log
@@ -19,18 +22,28 @@ side_shelf_state.json
 stash/
 clip_monitor.log
 
+# ---- 发布包中的 Qt 运行库（由 windeployqt 在打包时生成，不入库）----
+/side_shelf.exe
+/Qt6*.dll
+/D3Dcompiler_*.dll
+/opengl32sw.dll
+/platforms/
+/styles/
+/imageformats/
+/iconengines/
+/networkinformation/
+/generic/
+/tls/
+
 # ---- 日志与调试输出 ----
 *.log
 *.csv
 cpp/*.txt
 !cpp/CMakeLists.txt
 
-# ---- 离屏预览 / 截图对比产物 ----
-out.png
-out.*.png
-font-check-*.png
-preview_*.png
-base*.png
+# ---- 离屏预览 / 截图对比产物（docs/ 内的成图除外）----
+/shelf*.png
+/panel*.png
 
 # ---- Python ----
 __pycache__/
