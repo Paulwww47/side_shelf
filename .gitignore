@@ -1,0 +1,49 @@
+# ---- 构建产物（可用 cmake 重新生成，不入库）----
+cpp/build/
+cpp/build-*/
+cpp/stale_root_copies/
+CMakeCache.txt
+CMakeFiles/
+*.ninja
+.ninja_deps
+.ninja_log
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+*.idb
+
+# ---- 运行期状态与暂存（本机数据，不入库）----
+side_shelf_state.json
+stash/
+clip_monitor.log
+
+# ---- 日志与调试输出 ----
+*.log
+*.csv
+cpp/*.txt
+!cpp/CMakeLists.txt
+
+# ---- 离屏预览 / 截图对比产物 ----
+out.png
+out.*.png
+font-check-*.png
+preview_*.png
+base*.png
+
+# ---- Python ----
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# ---- 会话工具临时产物 ----
+.dsh-vision-toolkit/
+
+# ---- 编辑器 / 系统 ----
+.vs/
+.vscode/
+.idea/
+Thumbs.db
+desktop.ini
