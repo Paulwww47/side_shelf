@@ -106,8 +106,23 @@ New-Item -ItemType Directory -Force -Path $stage | Out-Null
 Copy-Item $Exe (Join-Path $stage 'side_shelf.exe') -Force
 
 # 收集 Qt 运行库。不加 --no-opengl-sw：无可用 GPU 的环境需要软件光栅回退。
-& $wdq --release --no-translations --dir $stage (Join-Path $stage 'side_shelf.exe')
+# 加 --no-compiler-runtime：编译器运行时由下面的 Copy-VCRuntime 显式补齐；
+# 交给 windeployqt 会顺带塞进约 25 MB 的 vc_redist.x64.exe，而我们已经直接
+# 附带 CRT DLL，那份安装器纯属重复。
+& $wdq --release --no-translations --no-compiler-runtime --dir $stage (Join-Path $stage 'side_shelf.exe')
 if ($LASTEXITCODE -ne 0) { throw "windeployqt 失败（exit $LASTEXITCODE）" }
+
+# 程序走 OpenGL 渲染路径（无可用 GPU 时回退软件光栅），不需要 D3D12 的着色器
+# 编译器。这两个文件只在装有 Windows SDK 的机器上才会被 windeployqt 捞到，
+# 会让发布包凭空多出约 14 MB；本项目一直以来的可用部署中也不含它们。
+# vc_redist.x64.exe 同理：仅在 VCINSTALLDIR 已设置时才出现，属重复。
+foreach ($redundant in @('dxcompiler.dll', 'dxil.dll', 'vc_redist.x64.exe')) {
+    $p = Join-Path $stage $redundant
+    if (Test-Path $p) {
+        Remove-Item $p -Force
+        Write-Output "剔除冗余文件: $redundant"
+    }
+}
 
 if (-not (Copy-VCRuntime -Stage $stage)) {
     Write-Warning '未找到 MSVC 运行时 redist 目录，发布包将依赖目标机器已安装 VC++ Redistributable。'
