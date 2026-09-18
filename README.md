@@ -123,9 +123,19 @@
 
 ### 构建
 
+**必须先进入 MSVC 环境**。若 PATH 上存在 MinGW（如 `C:\mingw64`），CMake 会选中
+`g++`，随后去链接 MSVC 构建的 Qt，以 ABI 不匹配（链接期 `undefined reference`）
+告终。所以这里既建立 MSVC 环境，也显式指定编译器：
+
 ```bat
+rem 进入 MSVC 环境：开始菜单搜索「x64 Native Tools Command Prompt for VS 2022」，
+rem 或在普通 cmd 中先执行下面这行：
+rem   "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+
 cd cpp
-cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH=C:/Qt/6.9.3/msvc2022_64
+cmake -G Ninja -B build -DCMAKE_BUILD_TYPE=Release ^
+      -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl ^
+      -DCMAKE_PREFIX_PATH=C:/Qt/6.9.3/msvc2022_64
 cmake --build build
 ```
 

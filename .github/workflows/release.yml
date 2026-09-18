@@ -25,6 +25,14 @@ jobs:
         with:
           ref: ${{ inputs.tag || github.ref }}
 
+      # runner 的 PATH 上存在 C:\mingw64，若不先建立 MSVC 环境并显式指定
+      # 编译器，CMake 会选中 MinGW g++，随后去链接 MSVC 构建的 Qt，
+      # 以 ABI 不匹配（undefined reference）告终。
+      - name: 配置 MSVC 环境
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: 安装 Qt
         uses: jurplel/install-qt-action@v4
         with:
@@ -33,7 +41,7 @@ jobs:
           cache: true
 
       - name: 配置
-        run: cmake -S cpp -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+        run: cmake -S cpp -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
 
       - name: 构建
         run: cmake --build build
